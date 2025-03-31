@@ -178,5 +178,3 @@ cython_debug/
 
 # Auto Commit Bot
 .acbconfig
-
-examples/
