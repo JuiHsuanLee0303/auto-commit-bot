@@ -1,0 +1,35 @@
+[project]
+name = "auto-commit-bot"
+version = "0.1.0"
+description = "A Python package to automate Git commit message generation using LLM"
+authors = [
+    {name = "JuiHsuanLee0303",email = "juihsuanlee0303@gmail.com"}
+]
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "pyyaml (>=6.0.2,<7.0.0)",
+    "dotenv (>=0.9.9,<0.10.0)",
+    "click (>=8.1.8,<9.0.0)",
+    "requests (>=2.32.3,<3.0.0)",
+    "transformers (>=4.50.3,<5.0.0)"
+]
+
+[project.scripts]
+auto-commit = "auto_commit_bot.cli:main"
+
+[tool.poetry]
+name = "auto-commit-bot"
+version = "0.1.0"
+description = "A Python package to automate Git commit message generation using LLM"
+authors = ["JuiHsuanLee0303 <juihsuanlee0303@gmail.com>"]
+packages = [{include = "auto_commit_bot", from = "src"}]
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.3.5"
+pytest-mock = "^3.14.0"
+pytest-cov = "^6.0.0"
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
