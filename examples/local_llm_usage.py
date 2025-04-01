@@ -43,10 +43,10 @@ def setup_config():
         # Generation parameters
         "max_length": 2048,  # Maximum total sequence length
         "max_new_tokens": 100,  # Maximum number of tokens to generate
-        "temperature": 0.8,
+        "temperature": 0.7,
         "do_sample": True,
-        "top_p": 0.90,
-        "top_k": 55,
+        "top_p": 0.95,
+        "top_k": 50,
         "num_return_sequences": 1,
         "pad_token_id": 0,
         "eos_token_id": 2,

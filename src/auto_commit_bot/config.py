@@ -15,8 +15,13 @@ click.echo("✓ Environment variables loaded")
 
 DEFAULT_CONFIG = {
     "provider_type": "api",  # 'api' or 'local'
-    "model_name": "deepseek-ai/DeepSeek-V3-0324-fast",  # Default chat model
+    # API provider settings
+    "api_model_name": "deepseek-ai/DeepSeek-V3-0324-fast",
+    "api_url": "https://router.huggingface.co/nebius/v1/chat/completions",
     "huggingface_api_key": None,
+    # Local provider settings
+    "local_model_name": "gpt2",
+    # Common settings
     "commit_format": "conventional",  # conventional, angular, or gitmoji
     "prompt_template": None,  # Path to custom prompt template
 }

@@ -67,14 +67,19 @@ class LLMProvider:
         """Setup the selected LLM provider"""
         if self.provider_type == "api":
             click.echo("🌐 Setting up API provider...")
-            model_name = config.get("model_name", "deepseek-ai/DeepSeek-V3-0324-fast")
-            self.api_url = "https://router.huggingface.co/nebius/v1/chat/completions"
-            self.headers = {"Authorization": f"Bearer {config.get('huggingface_api_key')}"}
-            self.model = model_name
-            click.echo(f"✓ API configured for model: {model_name}")
+            self.api_url = config.get("api_url")
+            self.model = config.get("api_model_name")
+            api_key = config.get("huggingface_api_key")
+            if not api_key:
+                click.echo("❌ Error: No Hugging Face API key found", err=True)
+                click.echo("Please set your API key using:")
+                click.echo("  auto-commit configure --api-key YOUR_API_KEY")
+                raise ValueError("Missing API key")
+            self.headers = {"Authorization": f"Bearer {api_key}"}
+            click.echo(f"✓ API configured for model: {self.model}")
         else:
             click.echo("💻 Setting up local provider...")
-            model_name = config.get("model_name", "gpt2")
+            model_name = config.get("local_model_name")
             click.echo("📥 Loading tokenizer...")
             self.tokenizer = AutoTokenizer.from_pretrained(model_name)
             click.echo("📥 Loading model...")
@@ -224,14 +229,15 @@ Footer: Issue references, breaking changes
             
             if "choices" in result and len(result["choices"]) > 0:
                 raw_message = result["choices"][0]["message"]["content"].strip()
-                cleaned_message = self._clean_commit_message(raw_message, format_type)
-                if cleaned_message:
-                    return cleaned_message
+                if raw_message:
+                    click.echo("✓ Successfully extracted message from API response")
+                    return self._clean_commit_message(raw_message, format_type)
                 else:
-                    click.echo("❌ Could not extract valid commit message from response", err=True)
+                    click.echo("❌ Empty response from API", err=True)
                     return ""
             else:
                 click.echo("❌ Unexpected API response format", err=True)
+                click.echo("Response:", result)
                 return ""
                 
         except Exception as e:
