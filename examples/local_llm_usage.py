@@ -40,8 +40,17 @@ def setup_config():
         "device_map": "auto" if has_gpu else None,
         "load_in_8bit": True,
         "torch_dtype": "float16" if has_gpu else "float32",
-        "max_new_tokens": 100,
+        # Generation parameters
+        "max_length": 2048,  # Maximum total sequence length
+        "max_new_tokens": 100,  # Maximum number of tokens to generate
         "temperature": 0.7,
+        "do_sample": True,
+        "top_p": 0.95,
+        "top_k": 50,
+        "num_return_sequences": 1,
+        "pad_token_id": 0,
+        "eos_token_id": 2,
+        "truncation": True,  # Enable truncation
     }
     
     # Apply all configurations
@@ -121,7 +130,18 @@ def generate_commit_message(format_type: str = "short"):
         "device": "cuda" if torch.cuda.is_available() else "cpu",
         "device_map": "auto" if torch.cuda.is_available() else None,
         "load_in_8bit": True,
-        "torch_dtype": "float16" if torch.cuda.is_available() else "float32"
+        "torch_dtype": "float16" if torch.cuda.is_available() else "float32",
+        # Generation parameters
+        "max_length": 2048,
+        "max_new_tokens": 100,
+        "temperature": 0.7,
+        "do_sample": True,
+        "top_p": 0.95,
+        "top_k": 50,
+        "num_return_sequences": 1,
+        "pad_token_id": 0,
+        "eos_token_id": 2,
+        "truncation": True,
     }
     
     # Apply all configurations

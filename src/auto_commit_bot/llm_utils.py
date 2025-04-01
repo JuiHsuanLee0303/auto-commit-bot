@@ -261,9 +261,29 @@ Footer: Issue references, breaking changes
         click.echo("💭 Generating with local model...")
         result = self.pipeline(
             prompt,
-            max_length=128,
+            max_length=2048,
             num_return_sequences=1,
             pad_token_id=self.tokenizer.eos_token_id
         )
         click.echo("✓ Local generation complete")
-        return result[0]["generated_text"].strip() 
+        
+        # Extract the generated text
+        generated_text = result[0]["generated_text"].strip()
+        
+        # Try to extract message between commit tags
+        match = re.search(r"<commit>(.*?)</commit>", generated_text, re.DOTALL)
+        if match:
+            message = match.group(1).strip()
+            click.echo("✓ Successfully extracted commit message from tags")
+            return self._clean_commit_message(message)
+            
+        # If no tags found, try to find a conventional commit format message
+        lines = generated_text.splitlines()
+        for line in lines:
+            line = line.strip()
+            if any(line.startswith(t) for t in VALID_COMMIT_TYPES):
+                click.echo("✓ Found valid commit message format")
+                return line
+                
+        click.echo("❌ Could not find valid commit message in generated text", err=True)
+        return "" 
