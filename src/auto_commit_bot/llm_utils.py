@@ -18,10 +18,15 @@ VALID_COMMIT_TYPES = [
 DEFAULT_PROMPT_TEMPLATE = """
 You are a commit message generator that follows the Conventional Commits specification and best practices for Git commit messages.
 
-Commit Message Format:
-{detailed_format}
+Your task is to analyze the git diff and generate a commit message that follows the Conventional Commits format.
 
-Type Categories:
+Rules:
+1. The message MUST start with a type (feat, fix, docs, etc.)
+2. The type MAY have a scope in parentheses
+3. The type is followed by a colon and space
+4. The subject line describes the change concisely
+
+Valid Types:
 - feat: New features or modifications
 - fix: Bug fixes
 - docs: Documentation changes
@@ -32,45 +37,22 @@ Type Categories:
 - chore: Build process or tool changes
 - revert: Revert previous commits
 
-Examples:
-
-1. Short Format Example:
-Input: Fixed null pointer exception in user authentication
-Output: fix(auth): handle null user credentials
-
-2. Detailed Format Example:
-Input: Added rate limiting to API endpoints to prevent abuse
-Output: feat(api): implement rate limiting for endpoints
-
-Header:
-- Rate limiting added to all API endpoints
-- Default limit: 100 requests per minute
-
-Body:
-- Added Redis-based rate limiting middleware
-- Configurable limits per endpoint and user role
-- Added rate limit headers in responses
-
-Footer:
-Closes #123
-BREAKING CHANGE: API responses now include rate limit headers
+Example Good Messages:
+- feat(auth): add OAuth2 authentication
+- fix(api): handle null response from server
+- docs(readme): update installation instructions
+- style(lint): format code according to new rules
+- refactor(core): simplify error handling logic
 
 Now, analyze this git diff and generate a commit message in the {format_type} format:
 
 Git diff:
 {diff}
 
-IMPORTANT: Return ONLY the commit message between <commit> and </commit> tags, without any additional text, explanations, or labels.
+IMPORTANT: Return ONLY the commit message between <commit> and </commit> tags.
 Example response format:
 <commit>
-feat(api): add rate limiting to endpoints
-
-Implement Redis-based rate limiting
-- Set default limit to 100 req/min
-- Add configurable per-endpoint limits
-
-Closes #123
-BREAKING CHANGE: Add rate limit headers
+feat(api): implement user authentication
 </commit>
 """
 
@@ -263,7 +245,12 @@ Footer: Issue references, breaking changes
             prompt,
             max_length=2048,
             num_return_sequences=1,
-            pad_token_id=self.tokenizer.eos_token_id
+            pad_token_id=self.tokenizer.eos_token_id,
+            truncation=True,
+            do_sample=True,
+            temperature=0.7,
+            top_p=0.95,
+            top_k=50
         )
         click.echo("✓ Local generation complete")
         
@@ -271,19 +258,22 @@ Footer: Issue references, breaking changes
         generated_text = result[0]["generated_text"].strip()
         
         # Try to extract message between commit tags
-        match = re.search(r"<commit>(.*?)</commit>", generated_text, re.DOTALL)
+        match = re.search(r"<commit>\s*(.*?)\s*</commit>", generated_text, re.DOTALL)
         if match:
             message = match.group(1).strip()
-            click.echo("✓ Successfully extracted commit message from tags")
-            return self._clean_commit_message(message)
+            if message and any(message.startswith(t) for t in VALID_COMMIT_TYPES):
+                click.echo("✓ Successfully extracted commit message from tags")
+                return message
             
-        # If no tags found, try to find a conventional commit format message
+        # If no valid message found in tags, try to find a conventional commit format message
         lines = generated_text.splitlines()
         for line in lines:
             line = line.strip()
-            if any(line.startswith(t) for t in VALID_COMMIT_TYPES):
+            if line and any(line.startswith(t) for t in VALID_COMMIT_TYPES):
                 click.echo("✓ Found valid commit message format")
                 return line
                 
         click.echo("❌ Could not find valid commit message in generated text", err=True)
+        click.echo("Generated text for debugging:")
+        click.echo(generated_text)
         return "" 
