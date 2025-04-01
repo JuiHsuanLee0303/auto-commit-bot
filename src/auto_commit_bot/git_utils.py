@@ -101,6 +101,8 @@ def get_git_diff(staged: bool = True, simplified: bool = True, max_length: int =
         click.echo("📝 Simplifying diff...")
         stdout = simplify_diff(stdout, max_length)
         click.echo(f"✓ Simplified diff: {len(stdout)} chars")
+
+    click.echo(f"Debug - Diff: {stdout}")
     
     return stdout
 
