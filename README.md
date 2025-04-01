@@ -35,7 +35,22 @@ pip3 install torch torchvision torchaudio
 ### 2. Install Auto Commit Bot
 
 ```bash
-pip install auto-commit-bot
+# Clone the repository
+git clone https://github.com/JuiHsuanLee/auto-commit-bot.git
+cd auto-commit-bot
+
+# Install dependencies and package
+pip install -e .
+```
+
+### 3. Verify Installation
+
+```bash
+# Run using Python module
+python -m auto_commit_bot --help
+
+# Or use the command directly (if Python Scripts directory is in PATH)
+auto-commit --help
 ```
 
 ## Quick Start 🚀
